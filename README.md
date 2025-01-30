@@ -44,7 +44,7 @@
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/PriceStream.git
+   git clone [https://github.com/your-repo/PriceStream.git](https://github.com/AlbertKarapetyan/PriceStream.git)
    cd PriceStream
    ```
 2. Install dependencies:
