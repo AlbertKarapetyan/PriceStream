@@ -34,7 +34,7 @@
 
 ## Tech Stack
 
-- **.NET 7+**
+- **.NET 8**
 - **MediatR**
 - **SignalR**
 - **Swagger/OpenAPI**
