@@ -1,8 +1,12 @@
 using PS.Application;
 using PS.Application.DIConfiguration;
 using PS.Application.Extensions;
+using PS.Application.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog for ELK logging using custom configuration class
+LoggingConfiguration.ConfigureSerilog(builder);
 
 // Configure logging
 var loggerFactory = LoggerFactory.Create(logging =>

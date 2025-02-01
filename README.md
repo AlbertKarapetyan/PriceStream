@@ -1,4 +1,4 @@
-# PriceStream Project
+﻿# PriceStream Project
 
 ## Overview
 
@@ -38,7 +38,8 @@
 - **MediatR**
 - **SignalR**
 - **Swagger/OpenAPI**
-- **Logging**
+- **Grafana** (for monitoring logs and metrics)
+- **Serilog** (for logging)
 
 ## Setup
 
@@ -72,7 +73,7 @@ This architecture promotes **separation of concerns** and ensures scalability, m
 
 By following DDD and SOLID principles, the project remains **scalable, flexible, and maintainable**.
 
-## 3. WebSocket Services & Price Caching
+## 3. WebSocket Services & Price Caching 💹
 
 ### ExchangeWebSocketBackgroundService
 
@@ -126,7 +127,7 @@ The **ExchangeWebSocketClient** is a separate project within the solution that a
 
 The **ExchangeWebSocketClient** ensures efficient consumption of market data while keeping network resource usage optimized.
 
-## 5. Docker & Containerization
+## 5. Docker & Containerization 🐳
 
 ### Dockerfile
 
@@ -160,7 +161,7 @@ docker run -p 5000:5000 pricestream
 docker-compose up -d
 ```
 
-### Scaling with Docker Compose Replicas
+### Scaling with Docker Compose Replicas 🔄
 
 To enhance scalability and handle a high number of WebSocket clients, **Docker Compose** can be used to run multiple replicas of the service. This is done using the `deploy` section in `docker-compose.yml`:
 
@@ -176,6 +177,36 @@ services:
 - **Load Distribution**: Requests are handled across multiple instances, reducing the load on a single service.
 - **High Availability**: If one instance fails, others continue serving clients.
 - **Better Performance**: Supports a larger number of WebSocket connections without degradation.
+
+## Serilog Configuration & Performance 📝
+### Serilog Configuration:
+The project uses **Serilog** for logging, providing powerful logging capabilities while maintaining performance. The configuration allows for flexible log routing and indexing:
+- **Console Logging**: Enabled only in development to avoid performance degradation in production.
+- **OpenSearch**: Logs are sent to **OpenSearch** for centralized log storage, ensuring efficient querying and visualization in tools like **Grafana**.
+
+### Impact on Performance:
+While logging can be resource-intensive, Serilog ensures high performance by:
+
+- **Asynchronous Operations**: Logs are written asynchronously, reducing the impact on the application's throughput.
+- **Batching**: Logs are sent in batches (up to 1000 logs per batch) to minimize the frequency of requests to OpenSearch.
+- **Efficient Indexing**: By using time-based indexing (`logstash-{0:yyyy.MM.dd}` and `instrument-{0:yyyy.MM.dd}`), logs are efficiently stored and queried in OpenSearch.
+Overall, the Serilog configuration is designed to ensure that logging does not significantly impact application performance while still providing detailed insights into application behavior.
+
+## Grafana Monitoring 📊
+### Overview:
+Grafana is integrated for real-time log monitoring. It connects to Elasticsearch and displays logs collected by Serilog.
+
+### Grafana Features:
+- Visualizes Logs: View logs from Elasticsearch in an interactive Grafana dashboard.
+- Real-Time Monitoring: Continuously monitor application logs.
+- Pre-configured Dashboard: Import the `grafana.json` to visualize data quickly.
+
+### Grafana & Elasticsearch Setup in Docker Compose:
+Grafana is included in the docker-compose.yml to automate deployment.
+
+## Grafana Dashboard:
+- `grafana.json`: Import this pre-configured dashboard to visualize logs from **Elasticsearch**.
+- **Real-time Updates**: Monitor application performance and logs in real-time.
 
 ## Conclusion
 

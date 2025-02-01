@@ -1,6 +1,39 @@
 services:
+  # ELK Stack
+  ps-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:sha256-fff57a996ea17bad3163108f6f3221c7f5a43cac20bffea5082c49eb4d7950e5
+    container_name: ps-elasticsearch
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      xpack.security.enabled: false
+    ports:
+      - "9201:9200"
+    networks:
+      - app_network
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # Grafana Service
+  ps-grafana:
+    image: grafana/grafana:latest
+    container_name: ps-grafana
+    ports:
+      - "30000:3000"
+    networks:
+      - app_network
+    depends_on:
+      - ps-elasticsearch
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "123456"  # Optional: Set the admin password if needed
+
+  
+  # Main Application    
   pricestream:
     image: pricestream
+    container_name: pricestream
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,7 +43,13 @@ services:
       - "5000:5000"
     networks:
       - app_network
-
+    healthcheck:
+      test: ["CMD", "echo", "OK"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+     
+  # Client Application
   websocketclient:
     build:
         context: ./ExchangeWebSocketClient
@@ -19,11 +58,18 @@ services:
         - ASPNETCORE_ENVIRONMENT=Production
     networks:
         - app_network
+    depends_on:
+        pricestream:
+            condition: service_healthy
     deploy:
         replicas: 2
-    entrypoint: >
-        sh -c "sleep 2 && dotnet ExchangeWebSocketClient.dll"
 
 networks:
   app_network:
     driver: bridge
+
+volumes:
+    es_data:    
+    grafana_data:
+
+  
